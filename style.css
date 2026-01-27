@@ -12,6 +12,7 @@
     padding: 0; 
     box-sizing: border-box; 
     font-family: 'Segoe UI', sans-serif; 
+    -webkit-tap-highlight-color: transparent; /* Remove brilho ao tocar no iPhone */
 }
 
 body { 
@@ -71,27 +72,38 @@ header {
 
 .form-group { margin-bottom: 12px; }
 
+/* AJUSTE PARA IPHONE (DATA E INPUTS) */
 .form-control {
     width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #fafafa;
-    font-size: 16px;
+    font-size: 16px; /* Tamanho mínimo para não dar zoom no iOS */
+    color: #333;
+    -webkit-appearance: none; /* Remove estilo nativo do iPhone */
+    appearance: none;
+    display: block;
 }
 
-/* BOTÕES - CORREÇÃO AQUI */
+/* Força a altura da data no iPhone para bater com os outros */
+input[type="date"].form-control {
+    min-height: 45px; 
+    align-items: center;
+}
+
+/* BOTÕES LADO A LADO */
 .form-buttons {
-    display: flex !important; /* Força o alinhamento em linha */
-    flex-direction: row !important; /* Garante que fiquem um ao lado do outro */
+    display: flex !important;
+    flex-direction: row !important;
     gap: 10px; 
     margin-top: 15px;
     width: 100%;
 }
 
 .btn {
-    flex: 1; /* Faz cada botão ocupar 50% do espaço */
-    padding: 12px 15px;
+    flex: 1;
+    height: 48px; /* Altura fixa para garantir alinhamento */
     border: none;
     border-radius: 8px;
     background: var(--primary);
@@ -103,15 +115,11 @@ header {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: 0.2s;
+    -webkit-appearance: none;
 }
 
 .btn-secondary {
     background-color: #6c757d !important;
-}
-
-.btn:active {
-    transform: scale(0.95);
 }
 
 /* LISTA COMPACTA */
@@ -133,6 +141,7 @@ header {
     padding: 10px 10px 10px 35px;
     border-radius: 8px;
     border: 1px solid #ddd;
+    -webkit-appearance: none;
 }
 
 .registro-item {
