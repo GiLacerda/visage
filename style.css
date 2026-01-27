@@ -162,3 +162,31 @@ header {
 .message.error { background: #ffebee; color: var(--danger); }
 
 .empty-state { text-align: center; padding: 40px; color: #ccc; }
+
+/* Botões Lado a Lado */
+.form-buttons {
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+    margin-top: 15px;
+}
+
+.form-buttons .btn {
+    flex: 1; /* Faz os botões terem o mesmo tamanho */
+    padding: 12px;
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Cor cinza para o botão limpar */
+}
+
+/* Ajuste adicional para mobile */
+@media (max-width: 400px) {
+    .form-buttons {
+        gap: 5px;
+    }
+    .btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
