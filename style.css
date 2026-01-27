@@ -1,0 +1,324 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #8a5a44;
+            --secondary: #d4b5a0;
+            --light: #f9f5f1;
+            --dark: #5c4033;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 15px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(to right, var(--primary), var(--dark));
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        /* Tabs de navegação */
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Formulário */
+        .form-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-container h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-container h2 i {
+            color: var(--secondary);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            background-color: #fafafa;
+        }
+        
+        .form-control::placeholder {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            background-color: white;
+        }
+        
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        
+        .btn:hover {
+            background-color: var(--dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        /* Lista de registros */
+        .list-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-container {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+        
+        .search-container input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #fafafa;
+        }
+        
+        .search-container input::placeholder {
+            color: #666;
+        }
+        
+        .registro-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background-color: #fdfdfd;
+        }
+        
+        .registro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .cliente-nome {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .registro-data {
+            color: #666;
+            font-size: 0.8rem;
+            background-color: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 15px;
+        }
+        
+        .registro-detalhes {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .procedimento {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        .valor {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 1rem;
+        }
+        
+        .observacoes {
+            font-style: italic;
+            color: #666;
+            font-size: 0.85rem;
+            padding-top: 8px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: #777;
+        }
+        
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+        
+        /* Mensagens */
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .message.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border-left: 3px solid var(--success);
+        }
+        
+        .message.error {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+            border-left: 3px solid var(--danger);
+        }
+        
+        /* Ações */
+        .acoes {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .acao-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .acao-editar {
+            background-color: rgba(138, 90, 68, 0.1);
+            color: var(--primary);
+        }
+        
+        .acao-excluir {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Botões do formulário */
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        /* Responsividade */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
