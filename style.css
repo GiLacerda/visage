@@ -64,8 +64,7 @@ header {
 }
 
 .btn {
-    width: 100%;
-    padding: 15px;
+    padding: 12px 15px;
     border: none;
     border-radius: 8px;
     background: var(--primary);
@@ -73,6 +72,11 @@ header {
     font-weight: bold;
     font-size: 16px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.3s;
 }
 
 /* LISTA COMPACTA */
@@ -163,30 +167,24 @@ header {
 
 .empty-state { text-align: center; padding: 40px; color: #ccc; }
 
-/* Botões Lado a Lado */
+/* Container que coloca os botões lado a lado */
 .form-buttons {
     display: flex;
-    gap: 10px; /* Espaço entre os botões */
+    gap: 10px; /* Espaçamento entre Salvar e Limpar */
     margin-top: 15px;
+    width: 100%;
 }
 
 .form-buttons .btn {
-    flex: 1; /* Faz os botões terem o mesmo tamanho */
-    padding: 12px;
+    flex: 1; /* Divide o espaço igualmente (50% para cada) */
 }
 
+/* Cor diferente para o botão limpar */
 .btn-secondary {
-    background-color: #6c757d; /* Cor cinza para o botão limpar */
+    background-color: #6c757d !important; 
 }
 
-/* Ajuste adicional para mobile */
-@media (max-width: 400px) {
-    .form-buttons {
-        gap: 5px;
-    }
-    .btn {
-        font-size: 14px;
-        padding: 10px;
-    }
+.btn:active {
+    transform: scale(0.98);
 }
 
