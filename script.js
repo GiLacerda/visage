@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9dzjj3W6yNRD9tKyyRt8SnPr75k1_JOCTA_9hALkDHj3A8M5kK73-rz4-ObAA--H-qw/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPA7i_zEYbHlheUySvJy8YYM8tHv1O2a519vu-vVTAfN9cpc_kPQ76eLkJ8Mcov3aE/exec';
 
 let registros = [];
 
@@ -128,3 +128,4 @@ function mascaraMoeda(input) {
     valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
     input.value = "R$ " + valor;
 }
+
