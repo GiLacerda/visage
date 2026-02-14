@@ -23,7 +23,6 @@ tabs.forEach(tab => {
 
         const tabName = tab.getAttribute('data-tab');
         
-        // Esconder todos os containers
         formContainer.style.display = 'none';
         listContainer.style.display = 'none';
         dashboardContainer.style.display = 'none';
@@ -35,13 +34,7 @@ tabs.forEach(tab => {
             carregarDadosDaPlanilha();
         } else if (tabName === 'dashboard') {
             dashboardContainer.style.display = 'block';
-            // Se já tivermos registros, apenas atualiza o cálculo. 
-            // Se não, carrega da planilha primeiro.
-            if (registros.length > 0) {
-                atualizarDashboard();
-            } else {
-                carregarDadosDaPlanilha();
-            }
+            carregarDadosDaPlanilha(); // Carrega sempre para garantir dados atualizados
         }
     });
 });
@@ -71,7 +64,6 @@ form.addEventListener('submit', function(e) {
         mostrarMensagem('Sucesso! Registado na nuvem.', 'success');
         form.reset();
         document.getElementById('data').valueAsDate = new Date();
-        // Limpa os registros locais para forçar um novo download ao mudar de aba
         registros = []; 
     })
     .catch(error => {
@@ -82,7 +74,6 @@ form.addEventListener('submit', function(e) {
 
 // FUNÇÃO: Procurar dados na Planilha (doGet)
 async function carregarDadosDaPlanilha() {
-    // Feedback visual de carregamento
     if (listContainer.style.display !== 'none') {
         registrosLista.innerHTML = '<div class="empty-state"><i class="fas fa-sync fa-spin"></i><p>A carregar dados...</p></div>';
     }
@@ -91,14 +82,15 @@ async function carregarDadosDaPlanilha() {
         const response = await fetch(GOOGLE_SCRIPT_URL);
         const dados = await response.json();
         
-        // Inverte a ordem para mostrar os mais recentes primeiro
         registros = dados.reverse();
         
-        // Renderiza a lista se a aba estiver aberta
         renderizarRegistros();
         
-        // Atualiza o dashboard automaticamente (caso a aba dashboard esteja aberta ou para deixar pronto)
-        atualizarDashboard();
+        // Garante que o seletor de meses seja criado e o dashboard calculado
+        if (registros.length > 0) {
+            preencherMeses();
+            atualizarDashboard();
+        }
         
     } catch (error) {
         console.error("Erro ao carregar:", error);
@@ -157,38 +149,47 @@ function mascaraMoeda(input) {
     input.value = "R$ " + valor;
 }
 
-// Função para identificar quais meses existem na planilha e preencher o <select>
+// Função para identificar meses e preencher o <select>
 function preencherMeses() {
     const seletor = document.getElementById('mes-filtro');
     if (!seletor || registros.length === 0) return;
 
-    // Pega todos os meses/anos únicos dos registros
+    // Gera lista de Meses/Anos únicos
     const mesesUnicos = [...new Set(registros.map(reg => {
         const data = new Date(reg.data);
         return `${data.getMonth() + 1}/${data.getFullYear()}`;
-    }))];
+    }))].sort((a, b) => {
+        const [m1, y1] = a.split('/').map(Number);
+        const [m2, y2] = b.split('/').map(Number);
+        return new Date(y2, m2-1) - new Date(y1, m1-1); // Mais recente primeiro
+    });
 
-    // Se o seletor já tiver opções, não duplica (exceto se quiser atualizar)
-    const valorAtual = seletor.value;
+    const valorSelecionadoAntes = seletor.value;
+
     seletor.innerHTML = mesesUnicos.map(mesAno => {
         const [mes, ano] = mesAno.split('/');
-        const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(ano, mes - 1));
-        return `<option value="${mesAno}">${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)} / ${ano}</option>`;
+        const dataReferencia = new Date(ano, mes - 1);
+        const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dataReferencia);
+        const mesCapitalizado = nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1);
+        return `<option value="${mesAno}">${mesCapitalizado} / ${ano}</option>`;
     }).join('');
 
-    // Tenta manter o mês selecionado ou pega o mais recente
-    if (valorAtual) seletor.value = valorAtual;
+    // Se já tinha algo selecionado, mantém. Se não, pega o primeiro da lista (mais recente).
+    if (valorSelecionadoAntes && mesesUnicos.includes(valorSelecionadoAntes)) {
+        seletor.value = valorSelecionadoAntes;
+    } else {
+        seletor.value = mesesUnicos[0];
+    }
 }
 
 // DASHBOARD: Lógica de processamento
 function atualizarDashboard() {
-    if (!registros || registros.length === 0) return;
-
-    // Garante que o seletor de meses existe e está populado
-    preencherMeses();
-    
     const seletorMes = document.getElementById('mes-filtro');
-    const mesAnoSelecionado = seletorMes.value; // Ex: "2/2026"
+    const dashStatsContainer = document.getElementById('procedimentos-stats');
+    
+    if (!registros || registros.length === 0 || !seletorMes.value) return;
+
+    const mesAnoSelecionado = seletorMes.value; 
 
     let totalBruto = 0;
     let contadorAtendimentos = 0;
@@ -198,7 +199,6 @@ function atualizarDashboard() {
         const dataReg = new Date(reg.data);
         const mesAnoReg = `${dataReg.getMonth() + 1}/${dataReg.getFullYear()}`;
 
-        // FILTRO: Só processa se o mês/ano for o selecionado
         if (mesAnoReg === mesAnoSelecionado) {
             contadorAtendimentos++;
             
@@ -221,12 +221,12 @@ function atualizarDashboard() {
         }
     });
 
-    // Atualiza os Cards com os dados FILTRADOS
     document.getElementById('dash-total-valor').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('dash-total-qtd').innerText = contadorAtendimentos;
 
-    // Gera a lista de procedimentos do mês
-    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de ${seletorMes.options[seletorMes.selectedIndex].text}</h3>`;
+    // Cabeçalho da lista com o nome do mês selecionado
+    const nomeMesExibicao = seletorMes.options[seletorMes.selectedIndex]?.text || "";
+    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo: ${nomeMesExibicao}</h3>`;
     
     const ordenados = Object.keys(stats).sort((a,b) => stats[b].qtd - stats[a].qtd);
     
@@ -235,11 +235,16 @@ function atualizarDashboard() {
         htmlProc += `
             <div class="registro-item">
                 <div class="registro-header" style="display: flex; justify-content: space-between; width: 100%;">
-                    <span class="cliente-nome">${proc} (${stats[proc].qtd}x)</span>
-                    <span class="valor">${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="cliente-nome">${proc} <small>(${stats[proc].qtd}x)</small></span>
+                    <span class="valor" style="color: var(--primary); font-weight: bold;">
+                        ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
                 </div>
             </div>`;
     });
 
-    document.getElementById('procedimentos-stats').innerHTML = htmlProc;
+    dashStatsContainer.innerHTML = htmlProc;
 }
+
+// Listener para quando o usuário trocar o mês manualmente
+document.getElementById('mes-filtro').addEventListener('change', atualizarDashboard);
