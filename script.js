@@ -189,7 +189,7 @@ function atualizarDashboard() {
     document.getElementById('dash-total-valor').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('dash-total-qtd').innerText = contadorAtendimentos;
 
-    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de Procedimentos</h3>`;
+    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de Procedimentos (valor médio)</h3>`;
     Object.keys(stats).sort((a,b) => stats[b].qtd - stats[a].qtd).forEach(proc => {
         const media = stats[proc].soma / stats[proc].qtd;
         htmlProc += `
