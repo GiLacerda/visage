@@ -50,7 +50,7 @@ if (form) {
             nome: document.getElementById('nome').value.trim(),
             data: document.getElementById('data').value,
             procedimento: document.getElementById('procedimento').value,
-            valor: document.getElementById('valor').value,
+            valor: mascaraMoeda(document.getElementById('valor').value),
             observacoes: document.getElementById('observacoes').value.trim()
         };
 
@@ -123,7 +123,7 @@ function renderizarRegistros() {
             </div>
             <div class="registro-detalhes">
                 <div class="procedimento">${reg.procedimento}</div>
-                <div class="valor">R$ ${(reg.valor)},00</div>
+                <div class="valor">${(reg.valor)}</div>
             </div>
             ${reg.observacoes ? `<div class="observacoes">${reg.observacoes}</div>` : ''}
         </div>
