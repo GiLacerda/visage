@@ -5,6 +5,7 @@ let registros = [];
 // Elementos DOM
 const formContainer = document.getElementById('form-container');
 const listContainer = document.getElementById('list-container');
+const dashboardContainer = document.getElementById('dashboard-container');
 const tabs = document.querySelectorAll('.tab');
 const form = document.getElementById('agendamento-form');
 const searchInput = document.getElementById('search-input');
@@ -13,7 +14,8 @@ const messageDiv = document.getElementById('message');
 
 // Inicializar a data atual no formulário
 document.getElementById('data').valueAsDate = new Date();
-// No listener das abas, adicione a lógica para exibir o dashboard
+
+// Navegação por abas
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
@@ -24,7 +26,7 @@ tabs.forEach(tab => {
         // Esconder todos os containers
         formContainer.style.display = 'none';
         listContainer.style.display = 'none';
-        document.getElementById('dashboard-container').style.display = 'none';
+        dashboardContainer.style.display = 'none';
 
         if (tabName === 'form') {
             formContainer.style.display = 'block';
@@ -32,8 +34,14 @@ tabs.forEach(tab => {
             listContainer.style.display = 'block';
             carregarDadosDaPlanilha();
         } else if (tabName === 'dashboard') {
-            document.getElementById('dashboard-container').style.display = 'block';
-            atualizarDashboard(); // Nova função
+            dashboardContainer.style.display = 'block';
+            // Se já tivermos registros, apenas atualiza o cálculo. 
+            // Se não, carrega da planilha primeiro.
+            if (registros.length > 0) {
+                atualizarDashboard();
+            } else {
+                carregarDadosDaPlanilha();
+            }
         }
     });
 });
@@ -63,6 +71,8 @@ form.addEventListener('submit', function(e) {
         mostrarMensagem('Sucesso! Registado na nuvem.', 'success');
         form.reset();
         document.getElementById('data').valueAsDate = new Date();
+        // Limpa os registros locais para forçar um novo download ao mudar de aba
+        registros = []; 
     })
     .catch(error => {
         console.error('Erro:', error);
@@ -72,7 +82,10 @@ form.addEventListener('submit', function(e) {
 
 // FUNÇÃO: Procurar dados na Planilha (doGet)
 async function carregarDadosDaPlanilha() {
-    registrosLista.innerHTML = '<div class="empty-state"><i class="fas fa-sync fa-spin"></i><p>A carregar dados...</p></div>';
+    // Feedback visual de carregamento
+    if (listContainer.style.display !== 'none') {
+        registrosLista.innerHTML = '<div class="empty-state"><i class="fas fa-sync fa-spin"></i><p>A carregar dados...</p></div>';
+    }
     
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL);
@@ -80,15 +93,25 @@ async function carregarDadosDaPlanilha() {
         
         // Inverte a ordem para mostrar os mais recentes primeiro
         registros = dados.reverse();
+        
+        // Renderiza a lista se a aba estiver aberta
         renderizarRegistros();
+        
+        // Atualiza o dashboard automaticamente (caso a aba dashboard esteja aberta ou para deixar pronto)
+        atualizarDashboard();
+        
     } catch (error) {
         console.error("Erro ao carregar:", error);
-        registrosLista.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar dados.</p>';
+        if (registrosLista) {
+            registrosLista.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar dados.</p>';
+        }
     }
 }
 
 // FUNÇÃO: Renderizar a lista compacta
 function renderizarRegistros() {
+    if (!registrosLista) return;
+
     const termo = searchInput.value.toLowerCase();
     const filtrados = registros.filter(reg => 
         reg.nome.toLowerCase().includes(termo) || 
@@ -134,12 +157,14 @@ function mascaraMoeda(input) {
     input.value = "R$ " + valor;
 }
 
+// DASHBOARD: Lógica de processamento
 function atualizarDashboard() {
+    const dashStatsContainer = document.getElementById('procedimentos-stats');
+    
     // 1. Verifica se existem registros carregados
     if (!registros || registros.length === 0) {
-        const dashContainer = document.getElementById('procedimentos-stats');
-        if (dashContainer) {
-            dashContainer.innerHTML = '<div class="empty-state"><p>Nenhum dado disponível para o dashboard.</p></div>';
+        if (dashStatsContainer) {
+            dashStatsContainer.innerHTML = '<div class="empty-state"><p>Nenhum dado disponível.</p></div>';
         }
         return;
     }
@@ -149,10 +174,10 @@ function atualizarDashboard() {
 
     // 2. Processamento dos dados
     registros.forEach(reg => {
-        // Garantir que o valor seja tratado como String para podermos limpar a formatação
+        // Resolve o erro de "replace is not a function" convertendo para String
         let valorRaw = String(reg.valor || "0");
         
-        // Limpeza completa: remove "R$", espaços e pontos de milhar, depois troca vírgula por ponto
+        // Limpeza para formato brasileiro
         let valorLimpo = valorRaw
             .replace(/R\$/g, '')
             .replace(/\s/g, '')
@@ -162,7 +187,6 @@ function atualizarDashboard() {
         const valorNumerico = parseFloat(valorLimpo) || 0;
         totalBruto += valorNumerico;
 
-        // Agrupamento por procedimento
         const nomeProc = reg.procedimento || "Outros";
         if (!stats[nomeProc]) {
             stats[nomeProc] = { qtd: 0, soma: 0 };
@@ -171,7 +195,7 @@ function atualizarDashboard() {
         stats[nomeProc].soma += valorNumerico;
     });
 
-    // 3. Atualização dos Cards Superiores
+    // 3. Atualização dos Cards
     const elTotalValor = document.getElementById('dash-total-valor');
     const elTotalQtd = document.getElementById('dash-total-qtd');
 
@@ -185,17 +209,16 @@ function atualizarDashboard() {
         elTotalQtd.innerText = registros.length;
     }
 
-    // 4. Geração da lista detalhada (Média por Procedimento)
+    // 4. Geração da lista detalhada
     let htmlProc = '<h3 style="margin: 20px 0 10px 0; font-size: 1.1rem; color: var(--primary); border-bottom: 1px solid var(--secondary); padding-bottom: 5px;">Média por Procedimento</h3>';
     
-    // Transformar o objeto stats em array para ordenar pelos mais realizados (opcional)
     const procedimentosOrdenados = Object.keys(stats).sort((a, b) => stats[b].qtd - stats[a].qtd);
 
     procedimentosOrdenados.forEach(proc => {
         const media = stats[proc].soma / stats[proc].qtd;
         htmlProc += `
             <div class="registro-item" style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                <div class="registro-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="registro-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <span class="cliente-nome" style="font-weight: 600; color: var(--dark);">${proc} <small style="color: #666; font-weight: normal;">(${stats[proc].qtd}x)</small></span>
                     <span class="valor" style="color: var(--primary); font-weight: bold;">
                         ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -204,8 +227,7 @@ function atualizarDashboard() {
             </div>`;
     });
 
-    const containerStats = document.getElementById('procedimentos-stats');
-    if (containerStats) {
-        containerStats.innerHTML = htmlProc;
+    if (dashStatsContainer) {
+        dashStatsContainer.innerHTML = htmlProc;
     }
 }
