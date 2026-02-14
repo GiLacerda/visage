@@ -141,6 +141,7 @@ function atualizarDashboard() {
     const stats = {};
 
     registros.forEach(reg => {
+        console.log(`Processando: ${reg.procedimento} - ${reg.valor}`);
         // Limpar o valor (ex: "R$ 130,00" -> 130.00)
         const valorNumerico = parseFloat(reg.valor.replace(/[R$\.\s]/g, '').replace(',', '.')) || 0;
         totalBruto += valorNumerico;
