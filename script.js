@@ -16,6 +16,9 @@ document.getElementById('data').valueAsDate = new Date();
 // No listener das abas, adicione a lógica para exibir o dashboard
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
         const tabName = tab.getAttribute('data-tab');
         
         // Esconder todos os containers
