@@ -157,77 +157,89 @@ function mascaraMoeda(input) {
     input.value = "R$ " + valor;
 }
 
+// Função para identificar quais meses existem na planilha e preencher o <select>
+function preencherMeses() {
+    const seletor = document.getElementById('mes-filtro');
+    if (!seletor || registros.length === 0) return;
+
+    // Pega todos os meses/anos únicos dos registros
+    const mesesUnicos = [...new Set(registros.map(reg => {
+        const data = new Date(reg.data);
+        return `${data.getMonth() + 1}/${data.getFullYear()}`;
+    }))];
+
+    // Se o seletor já tiver opções, não duplica (exceto se quiser atualizar)
+    const valorAtual = seletor.value;
+    seletor.innerHTML = mesesUnicos.map(mesAno => {
+        const [mes, ano] = mesAno.split('/');
+        const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(ano, mes - 1));
+        return `<option value="${mesAno}">${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)} / ${ano}</option>`;
+    }).join('');
+
+    // Tenta manter o mês selecionado ou pega o mais recente
+    if (valorAtual) seletor.value = valorAtual;
+}
+
 // DASHBOARD: Lógica de processamento
 function atualizarDashboard() {
-    const dashStatsContainer = document.getElementById('procedimentos-stats');
+    if (!registros || registros.length === 0) return;
+
+    // Garante que o seletor de meses existe e está populado
+    preencherMeses();
     
-    // 1. Verifica se existem registros carregados
-    if (!registros || registros.length === 0) {
-        if (dashStatsContainer) {
-            dashStatsContainer.innerHTML = '<div class="empty-state"><p>Nenhum dado disponível.</p></div>';
-        }
-        return;
-    }
+    const seletorMes = document.getElementById('mes-filtro');
+    const mesAnoSelecionado = seletorMes.value; // Ex: "2/2026"
 
     let totalBruto = 0;
+    let contadorAtendimentos = 0;
     const stats = {};
 
-    // 2. Processamento dos dados
     registros.forEach(reg => {
-        // Resolve o erro de "replace is not a function" convertendo para String
-        let valorRaw = String(reg.valor || "0");
-        
-        // Limpeza para formato brasileiro
-        let valorLimpo = valorRaw
-            .replace(/R\$/g, '')
-            .replace(/\s/g, '')
-            .replace(/\./g, '')
-            .replace(',', '.');
-            
-        const valorNumerico = parseFloat(valorLimpo) || 0;
-        totalBruto += valorNumerico;
+        const dataReg = new Date(reg.data);
+        const mesAnoReg = `${dataReg.getMonth() + 1}/${dataReg.getFullYear()}`;
 
-        const nomeProc = reg.procedimento || "Outros";
-        if (!stats[nomeProc]) {
-            stats[nomeProc] = { qtd: 0, soma: 0 };
+        // FILTRO: Só processa se o mês/ano for o selecionado
+        if (mesAnoReg === mesAnoSelecionado) {
+            contadorAtendimentos++;
+            
+            let valorRaw = String(reg.valor || "0");
+            let valorLimpo = valorRaw
+                .replace(/R\$/g, '')
+                .replace(/\s/g, '')
+                .replace(/\./g, '')
+                .replace(',', '.');
+                
+            const valorNumerico = parseFloat(valorLimpo) || 0;
+            totalBruto += valorNumerico;
+
+            const nomeProc = reg.procedimento || "Outros";
+            if (!stats[nomeProc]) {
+                stats[nomeProc] = { qtd: 0, soma: 0 };
+            }
+            stats[nomeProc].qtd++;
+            stats[nomeProc].soma += valorNumerico;
         }
-        stats[nomeProc].qtd++;
-        stats[nomeProc].soma += valorNumerico;
     });
 
-    // 3. Atualização dos Cards
-    const elTotalValor = document.getElementById('dash-total-valor');
-    const elTotalQtd = document.getElementById('dash-total-qtd');
+    // Atualiza os Cards com os dados FILTRADOS
+    document.getElementById('dash-total-valor').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('dash-total-qtd').innerText = contadorAtendimentos;
 
-    if (elTotalValor) {
-        elTotalValor.innerText = totalBruto.toLocaleString('pt-BR', { 
-            style: 'currency', 
-            currency: 'BRL' 
-        });
-    }
-    if (elTotalQtd) {
-        elTotalQtd.innerText = registros.length;
-    }
-
-    // 4. Geração da lista detalhada
-    let htmlProc = '<h3 style="margin: 20px 0 10px 0; font-size: 1.1rem; color: var(--primary); border-bottom: 1px solid var(--secondary); padding-bottom: 5px;">Média por Procedimento</h3>';
+    // Gera a lista de procedimentos do mês
+    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de ${seletorMes.options[seletorMes.selectedIndex].text}</h3>`;
     
-    const procedimentosOrdenados = Object.keys(stats).sort((a, b) => stats[b].qtd - stats[a].qtd);
-
-    procedimentosOrdenados.forEach(proc => {
+    const ordenados = Object.keys(stats).sort((a,b) => stats[b].qtd - stats[a].qtd);
+    
+    ordenados.forEach(proc => {
         const media = stats[proc].soma / stats[proc].qtd;
         htmlProc += `
-            <div class="registro-item" style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                <div class="registro-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <span class="cliente-nome" style="font-weight: 600; color: var(--dark);">${proc} <small style="color: #666; font-weight: normal;">(${stats[proc].qtd}x)</small></span>
-                    <span class="valor" style="color: var(--primary); font-weight: bold;">
-                        ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+            <div class="registro-item">
+                <div class="registro-header" style="display: flex; justify-content: space-between; width: 100%;">
+                    <span class="cliente-nome">${proc} (${stats[proc].qtd}x)</span>
+                    <span class="valor">${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
             </div>`;
     });
 
-    if (dashStatsContainer) {
-        dashStatsContainer.innerHTML = htmlProc;
-    }
+    document.getElementById('procedimentos-stats').innerHTML = htmlProc;
 }

@@ -81,9 +81,14 @@
 
         <!-- Dashboard -->
         <div id="dashboard-container" class="form-container" style="display: none;">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="mes-filtro" style="font-size: 0.8rem; color: var(--primary); font-weight: bold;">Consultar Mês:</label>
+                <select id="mes-filtro" class="form-control" onchange="atualizarDashboard()"></select>
+            </div>
+
             <div class="dashboard-cards">
                 <div class="card">
-                    <span class="card-title">Total Recebido</span>
+                    <span class="card-title">Total no Mês</span>
                     <span id="dash-total-valor" class="card-value">R$ 0,00</span>
                 </div>
                 <div class="card">
@@ -91,9 +96,8 @@
                     <span id="dash-total-qtd" class="card-value">0</span>
                 </div>
             </div>
-        
-            <div id="procedimentos-stats" style="margin-top: 20px;">
-            </div>
+            
+            <div id="procedimentos-stats"></div>
         </div>
     </div>
 </body>
