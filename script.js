@@ -135,39 +135,77 @@ function mascaraMoeda(input) {
 }
 
 function atualizarDashboard() {
-    if (registros.length === 0) return;
+    // 1. Verifica se existem registros carregados
+    if (!registros || registros.length === 0) {
+        const dashContainer = document.getElementById('procedimentos-stats');
+        if (dashContainer) {
+            dashContainer.innerHTML = '<div class="empty-state"><p>Nenhum dado disponível para o dashboard.</p></div>';
+        }
+        return;
+    }
 
     let totalBruto = 0;
     const stats = {};
 
+    // 2. Processamento dos dados
     registros.forEach(reg => {
-        console.log(`Processando: ${reg.procedimento} - ${reg.valor}`);
-        // Limpar o valor (ex: "R$ 130,00" -> 130.00)
-        const valorNumerico = parseFloat(reg.valor.replace(/[R$\.\s]/g, '').replace(',', '.')) || 0;
+        // Garantir que o valor seja tratado como String para podermos limpar a formatação
+        let valorRaw = String(reg.valor || "0");
+        
+        // Limpeza completa: remove "R$", espaços e pontos de milhar, depois troca vírgula por ponto
+        let valorLimpo = valorRaw
+            .replace(/R\$/g, '')
+            .replace(/\s/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.');
+            
+        const valorNumerico = parseFloat(valorLimpo) || 0;
         totalBruto += valorNumerico;
 
-        if (!stats[reg.procedimento]) {
-            stats[reg.procedimento] = { qtd: 0, soma: 0 };
+        // Agrupamento por procedimento
+        const nomeProc = reg.procedimento || "Outros";
+        if (!stats[nomeProc]) {
+            stats[nomeProc] = { qtd: 0, soma: 0 };
         }
-        stats[reg.procedimento].qtd++;
-        stats[reg.procedimento].soma += valorNumerico;
+        stats[nomeProc].qtd++;
+        stats[nomeProc].soma += valorNumerico;
     });
 
-    // Atualiza os Cards
-    document.getElementById('dash-total-valor').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    document.getElementById('dash-total-qtd').innerText = registros.length;
+    // 3. Atualização dos Cards Superiores
+    const elTotalValor = document.getElementById('dash-total-valor');
+    const elTotalQtd = document.getElementById('dash-total-qtd');
 
-    // Gera a lista de procedimentos
-    let htmlProc = '<h3>Média por Procedimento</h3>';
-    for (const proc in stats) {
+    if (elTotalValor) {
+        elTotalValor.innerText = totalBruto.toLocaleString('pt-BR', { 
+            style: 'currency', 
+            currency: 'BRL' 
+        });
+    }
+    if (elTotalQtd) {
+        elTotalQtd.innerText = registros.length;
+    }
+
+    // 4. Geração da lista detalhada (Média por Procedimento)
+    let htmlProc = '<h3 style="margin: 20px 0 10px 0; font-size: 1.1rem; color: var(--primary); border-bottom: 1px solid var(--secondary); padding-bottom: 5px;">Média por Procedimento</h3>';
+    
+    // Transformar o objeto stats em array para ordenar pelos mais realizados (opcional)
+    const procedimentosOrdenados = Object.keys(stats).sort((a, b) => stats[b].qtd - stats[a].qtd);
+
+    procedimentosOrdenados.forEach(proc => {
         const media = stats[proc].soma / stats[proc].qtd;
         htmlProc += `
-            <div class="registro-item">
-                <div class="registro-header">
-                    <span class="cliente-nome">${proc} (${stats[proc].qtd})</span>
-                    <span class="valor">Média: ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            <div class="registro-item" style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                <div class="registro-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="cliente-nome" style="font-weight: 600; color: var(--dark);">${proc} <small style="color: #666; font-weight: normal;">(${stats[proc].qtd}x)</small></span>
+                    <span class="valor" style="color: var(--primary); font-weight: bold;">
+                        ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
                 </div>
             </div>`;
+    });
+
+    const containerStats = document.getElementById('procedimentos-stats');
+    if (containerStats) {
+        containerStats.innerHTML = htmlProc;
     }
-    document.getElementById('procedimentos-stats').innerHTML = htmlProc;
 }
