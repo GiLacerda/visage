@@ -123,7 +123,7 @@ function renderizarRegistros() {
             </div>
             <div class="registro-detalhes">
                 <div class="procedimento">${reg.procedimento}</div>
-                <div class="valor">${mascaraMoeda(reg.valor)}</div>
+                <div class="valor">`+mascaraMoeda(reg.valor)+`</div>
             </div>
             ${reg.observacoes ? `<div class="observacoes">${reg.observacoes}</div>` : ''}
         </div>
