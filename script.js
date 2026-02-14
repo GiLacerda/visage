@@ -50,7 +50,7 @@ if (form) {
             nome: document.getElementById('nome').value.trim(),
             data: document.getElementById('data').value,
             procedimento: document.getElementById('procedimento').value,
-            valor: mascaraMoeda(document.getElementById('valor').value),
+            valor: document.getElementById('valor').value,
             observacoes: document.getElementById('observacoes').value.trim()
         };
 
