@@ -209,3 +209,39 @@ input[type="date"].form-control {
 .message.error { background: #ffebee; color: var(--danger); }
 
 .empty-state { text-align: center; padding: 40px; color: #ccc; }
+
+.dashboard-cards {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.card {
+    flex: 1;
+    background: var(--light);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border-left: 4px solid var(--primary);
+}
+
+.card-title {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.card-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--dark);
+}
+
+#procedimentos-stats h3 {
+    font-size: 1rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--secondary);
+    padding-bottom: 5px;
+}

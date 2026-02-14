@@ -13,22 +13,24 @@ const messageDiv = document.getElementById('message');
 
 // Inicializar a data atual no formulário
 document.getElementById('data').valueAsDate = new Date();
-
-// Navegação por abas com carregamento de dados
+// No listener das abas, adicione a lógica para exibir o dashboard
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
         const tabName = tab.getAttribute('data-tab');
         
+        // Esconder todos os containers
+        formContainer.style.display = 'none';
+        listContainer.style.display = 'none';
+        document.getElementById('dashboard-container').style.display = 'none';
+
         if (tabName === 'form') {
             formContainer.style.display = 'block';
-            listContainer.style.display = 'none';
-        } else {
-            formContainer.style.display = 'none';
+        } else if (tabName === 'list') {
             listContainer.style.display = 'block';
             carregarDadosDaPlanilha();
+        } else if (tabName === 'dashboard') {
+            document.getElementById('dashboard-container').style.display = 'block';
+            atualizarDashboard(); // Nova função
         }
     });
 });
@@ -129,3 +131,39 @@ function mascaraMoeda(input) {
     input.value = "R$ " + valor;
 }
 
+function atualizarDashboard() {
+    if (registros.length === 0) return;
+
+    let totalBruto = 0;
+    const stats = {};
+
+    registros.forEach(reg => {
+        // Limpar o valor (ex: "R$ 130,00" -> 130.00)
+        const valorNumerico = parseFloat(reg.valor.replace(/[R$\.\s]/g, '').replace(',', '.')) || 0;
+        totalBruto += valorNumerico;
+
+        if (!stats[reg.procedimento]) {
+            stats[reg.procedimento] = { qtd: 0, soma: 0 };
+        }
+        stats[reg.procedimento].qtd++;
+        stats[reg.procedimento].soma += valorNumerico;
+    });
+
+    // Atualiza os Cards
+    document.getElementById('dash-total-valor').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('dash-total-qtd').innerText = registros.length;
+
+    // Gera a lista de procedimentos
+    let htmlProc = '<h3>Média por Procedimento</h3>';
+    for (const proc in stats) {
+        const media = stats[proc].soma / stats[proc].qtd;
+        htmlProc += `
+            <div class="registro-item">
+                <div class="registro-header">
+                    <span class="cliente-nome">${proc} (${stats[proc].qtd})</span>
+                    <span class="valor">Média: ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
+            </div>`;
+    }
+    document.getElementById('procedimentos-stats').innerHTML = htmlProc;
+}

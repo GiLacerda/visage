@@ -19,6 +19,7 @@
         <div class="tabs">
             <div class="tab active" data-tab="form">Novo</div>
             <div class="tab" data-tab="list">Registros</div>
+            <div class="tab" data-tab="dashboard">Dashboard</div> </div>
         </div>
         
         <!-- Mensagens -->
@@ -76,6 +77,23 @@
                 <input type="text" id="search-input" placeholder="Pesquisar...">
             </div>
             <div id="registros-lista"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard-container" class="form-container" style="display: none;">
+            <div class="dashboard-cards">
+                <div class="card">
+                    <span class="card-title">Total Recebido</span>
+                    <span id="dash-total-valor" class="card-value">R$ 0,00</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Atendimentos</span>
+                    <span id="dash-total-qtd" class="card-value">0</span>
+                </div>
+            </div>
+        
+            <div id="procedimentos-stats" style="margin-top: 20px;">
+            </div>
         </div>
     </div>
 </body>
