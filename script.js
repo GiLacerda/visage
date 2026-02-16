@@ -191,12 +191,12 @@ function atualizarDashboard() {
 
     let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de Procedimentos (valor médio)</h3>`;
     Object.keys(stats).sort((a,b) => stats[b].qtd - stats[a].qtd).forEach(proc => {
-        const media = stats[proc].soma / stats[proc].qtd;
+        const total = stats[proc].soma;
         htmlProc += `
             <div class="registro-item">
                 <div class="registro-header" style="display: flex; justify-content: space-between; width: 100%;">
                     <span class="cliente-nome">${proc} <small>(${stats[proc].qtd}x)</small></span>
-                    <span class="valor" style="color: var(--primary); font-weight: bold;">${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="valor" style="color: var(--primary); font-weight: bold;">${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
             </div>`;
     });
