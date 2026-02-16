@@ -189,17 +189,25 @@ function atualizarDashboard() {
     document.getElementById('dash-total-valor').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('dash-total-qtd').innerText = contadorAtendimentos;
 
-    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de Procedimentos (valor médio)</h3>`;
+    // Alteração para exibir o Valor Total acumulado por procedimento
+    let htmlProc = `<h3 style="margin-top:20px; font-size:1rem; color:var(--primary);">Resumo de Procedimentos (valor total)</h3>`;
+    
+    // Ordena pelos procedimentos mais realizados
     Object.keys(stats).sort((a,b) => stats[b].qtd - stats[a].qtd).forEach(proc => {
-        const total = stats[proc].soma;
+        // Agora usamos a soma direta sem dividir pela quantidade
+        const valorTotal = stats[proc].soma; 
+        
         htmlProc += `
             <div class="registro-item">
                 <div class="registro-header" style="display: flex; justify-content: space-between; width: 100%;">
                     <span class="cliente-nome">${proc} <small>(${stats[proc].qtd}x)</small></span>
-                    <span class="valor" style="color: var(--primary); font-weight: bold;">${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="valor" style="color: var(--primary); font-weight: bold;">
+                        ${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
                 </div>
             </div>`;
     });
+
     if (dashStatsContainer) dashStatsContainer.innerHTML = htmlProc;
 }
 
